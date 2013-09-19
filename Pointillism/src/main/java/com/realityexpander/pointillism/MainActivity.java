@@ -1,7 +1,7 @@
 package com.realityexpander.pointillism;
 
-import android.content.Context;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.database.Cursor;
@@ -10,22 +10,19 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ShareActionProvider;
-import android.widget.Toast;
-import android.view.MotionEvent;
-import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +41,7 @@ String cool= "cool";
 
     public Bitmap imageBitmap;
 
-    private LinearLayout container;
+    private HorizontalScrollView container;
     private int currentX;
     private int currentY;
 
@@ -63,11 +60,17 @@ String cool= "cool";
                 Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
             }
         });
+//        GridView gridView = (GridView) findViewById(R.id.gridView);
+//        gridView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
 
-        TextView textView2 = (TextView) findViewById(R.id.textView2);
-        textView2.setOnClickListener(new View.OnClickListener() {
+//            }
+//        });
+          TextView textView2 = (TextView) findViewById(R.id.textView2);
+          textView2.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {///
                 try {
                     // Load brush bitmap
                     Bitmap brushBitMap;
@@ -123,7 +126,7 @@ String cool= "cool";
 
 
 
-        container = (LinearLayout) findViewById(R.id.Container);
+        container = (HorizontalScrollView) findViewById(R.id.Container);
         //container.scrollTo(220, 400);
 
     }
