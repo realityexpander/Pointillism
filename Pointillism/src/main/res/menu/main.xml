@@ -3,4 +3,15 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
+    <item android:id="@+id/gallery_button"
+        android:icon="@drawable/gallery_icon"
+        android:title="gallery"
+        android:showAsAction="always|withText"/>
+
+    <item android:id="@+id/menu_item_share"
+        android:showAsAction="ifRoom"
+        android:title="Share"
+        android:actionProviderClass="android.widget.ShareActionProvider"/>
+
 </menu>

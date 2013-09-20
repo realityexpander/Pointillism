@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.provider.MediaStore;
+import android.support.v7.internal.view.menu.MenuView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,8 +41,9 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class MainActivity extends Activity {
-    private ShareActionProvider mShareActionProvider;
 
+    private ShareActionProvider mShareActionProvider;
+    private Intent mShareIntent;
 
 String cool= "cool";
 
@@ -59,14 +61,14 @@ String cool= "cool";
         setContentView(R.layout.activity_main);
 
         PickGalleryImage();
+
         GridView gridview = (GridView) findViewById(R.id.gridView);
         gridview.setAdapter(new ImageAdapter(this));
-
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
 
-                int xSource=0, ySource =0;
+                int xSource = 0, ySource = 0;
                 try {
                     // Load brush bitmap
                     Bitmap brushBitMap, rotatedBitmap;
@@ -81,7 +83,7 @@ String cool= "cool";
                     brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
 
                     // Apply a rotation
-                    Matrix matrix=new Matrix();
+                    Matrix matrix = new Matrix();
                     //imageView.setScaleType(ImageView.ScaleType.MATRIX);   //required
                     //matrix.postRotate((float) angle, pivX, pivY);
                     //matrix.postRotate( 180f, imageView.getDrawable().getBounds().width()/2, imageView.getDrawable().getBounds().height()/2);
@@ -116,7 +118,7 @@ String cool= "cool";
                     }
 
                     // Brush sampled colors & brush locations
-                    brush[][] theBrushes = new brush[widthNumBrushes+1][lengthNumBrushes+1];
+                    brush[][] theBrushes = new brush[widthNumBrushes + 1][lengthNumBrushes + 1];
                     float[] theHSVColor = new float[3];
 
                     // Sample the image at the brush center points into the brushes array
@@ -131,8 +133,8 @@ String cool= "cool";
                             //theBrushes[x][y].y = (y*lengthBrushImage) + (lengthBrushImage/2);
 
                             // Randomly distributed
-                            theBrushes[x][y].x = (int) (Math.random() * widthSourceImage)-1;
-                            theBrushes[x][y].y = (int) (Math.random() * lengthSourceImage)-1;
+                            theBrushes[x][y].x = (int) (Math.random() * widthSourceImage) - 1;
+                            theBrushes[x][y].y = (int) (Math.random() * lengthSourceImage) - 1;
 
                             // Sample the source image to get color of the brush
                             theBrushes[x][y].color = imageBitmap.getPixel(theBrushes[x][y].x, theBrushes[x][y].y);
@@ -148,10 +150,10 @@ String cool= "cool";
                             theBrushes[x][y].size = (float) .2;
 
                             // Angle = color
-                            //theBrushes[x][y].angle = 10; //theHSVColor[2];
+                            theBrushes[x][y].angle = theHSVColor[2];
 
                             //Angle = distance from top
-                            theBrushes[x][y].angle = (theBrushes[x][y].y / (float) widthSourceImage) * 180;
+                            //theBrushes[x][y].angle = (theBrushes[x][y].y / (float) widthSourceImage) * 180;
 
                         }
                     }
@@ -165,24 +167,24 @@ String cool= "cool";
 
                             // Rotate the brush
                             matrix.reset();
-                            matrix.postRotate(theBrushes[i][j].angle, brushBitMap.getWidth()/2, brushBitMap.getHeight()/2 );
+                            matrix.postRotate(theBrushes[i][j].angle, brushBitMap.getWidth() / 2, brushBitMap.getHeight() / 2);
                             rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
                                     matrix, true);
                             widthBrushImage = rotatedBitmap.getWidth();
                             lengthBrushImage = rotatedBitmap.getHeight();
 
                             // for non-rotated
-                            brushXStart = theBrushes[i][j].x - (int)((float)widthBrushImage / 2.0);
-                            brushXEnd   = theBrushes[i][j].x + (int)((float)widthBrushImage / 2.0);
-                            brushYStart = theBrushes[i][j].y - (int)((float)lengthBrushImage/ 2.0);
-                            brushYEnd   = theBrushes[i][j].y + (int)((float)lengthBrushImage/ 2.0);
+                            brushXStart = theBrushes[i][j].x - (int) ((float) widthBrushImage / 2.0);
+                            brushXEnd = theBrushes[i][j].x + (int) ((float) widthBrushImage / 2.0);
+                            brushYStart = theBrushes[i][j].y - (int) ((float) lengthBrushImage / 2.0);
+                            brushYEnd = theBrushes[i][j].y + (int) ((float) lengthBrushImage / 2.0);
 //                            brushXStart = theBrushes[i][j].x - (int)((float)widthBrushImage);
 //                            brushXEnd   = theBrushes[i][j].x + (int)((float)widthBrushImage);
 //                            brushYStart = theBrushes[i][j].y - (int)((float)lengthBrushImage);
 //                            brushYEnd   = theBrushes[i][j].y + (int)((float)lengthBrushImage);
-                            brushRed = (theBrushes[i][j].color & 0x00FF0000 ) >>> 16;
-                            brushGrn = (theBrushes[i][j].color & 0x0000FF00 ) >>> 8;
-                            brushBlu = (theBrushes[i][j].color & 0x000000FF );
+                            brushRed = (theBrushes[i][j].color & 0x00FF0000) >>> 16;
+                            brushGrn = (theBrushes[i][j].color & 0x0000FF00) >>> 8;
+                            brushBlu = (theBrushes[i][j].color & 0x000000FF);
 
                             // Render the brushes
                             int x, y;
@@ -191,18 +193,18 @@ String cool= "cool";
                             int sourcePixel, outColor;
                             brushSizeMult = ((float) 1 / theBrushes[i][j].size);
 
-                            for(xSource=brushXStart, x=0; xSource<=brushXEnd; xSource++, x++) {
-                                for(ySource=brushYStart, y=0; ySource<=brushYEnd; ySource++, y++) {
-                                    if ( xSource < widthSourceImage ) {
-                                        if( ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
+                            for (xSource = brushXStart, x = 0; xSource <= brushXEnd; xSource++, x++) {
+                                for (ySource = brushYStart, y = 0; ySource <= brushYEnd; ySource++, y++) {
+                                    if (xSource < widthSourceImage) {
+                                        if (ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
 
                                             sourcePixel = imageBitmap.getPixel(xSource, ySource);
 
-                                            brushSampleX =  (int) ((float)x * ((brushSizeMult)/2.0));
-                                            brushSampleY =  (int) ((float)y * ((brushSizeMult)/2.0));
+                                            brushSampleX = (int) ((float) x * ((brushSizeMult) / 2.0));
+                                            brushSampleY = (int) ((float) y * ((brushSizeMult) / 2.0));
                                             brushSample = 255;
-                                            if ( brushSampleX < widthBrushImage && brushSampleX >= 0) {
-                                                if( brushSampleY < lengthBrushImage && brushSampleY >= 0 ) {
+                                            if (brushSampleX < widthBrushImage && brushSampleX >= 0) {
+                                                if (brushSampleY < lengthBrushImage && brushSampleY >= 0) {
 
                                                     brushSample = 255 - rotatedBitmap.getPixel(brushSampleX, brushSampleY) & 0x000000FF;
 
@@ -210,13 +212,13 @@ String cool= "cool";
                                                     //outputGrn = (brushGrn * (255-brushSample)) >>> 8;
                                                     //outputBlu = (brushBlu * (255-brushSample)) >>> 8;
 
-                                                    if (brushSample < 254){
-                                                        outputRed = ( (((sourcePixel & 0x00FF0000 ) >>> 16) * (brushSample) ) +
-                                                                         (brushRed * (255-brushSample)) ) >>> 8;
-                                                        outputGrn = ( (((sourcePixel & 0x0000FF00 ) >>> 8) * (brushSample) ) +
-                                                                         (brushGrn * (255-brushSample)) ) >>> 8;
-                                                        outputBlu = ( (((sourcePixel & 0x000000FF ) ) * (brushSample) ) +
-                                                                         (brushBlu * (255-brushSample)) ) >>> 8;
+                                                    if (brushSample < 254) {
+                                                        outputRed = ((((sourcePixel & 0x00FF0000) >>> 16) * (brushSample)) +
+                                                                (brushRed * (255 - brushSample))) >>> 8;
+                                                        outputGrn = ((((sourcePixel & 0x0000FF00) >>> 8) * (brushSample)) +
+                                                                (brushGrn * (255 - brushSample))) >>> 8;
+                                                        outputBlu = ((((sourcePixel & 0x000000FF)) * (brushSample)) +
+                                                                (brushBlu * (255 - brushSample))) >>> 8;
 
 
                                                         //outputRed = 255 - brushSample; // testing
@@ -354,38 +356,26 @@ String cool= "cool";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-
-
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         // Inflate menu resource file.
-        getMenuInflater().inflate(R.menu.share_menu, menu);
-
+        //getMenuInflater().inflate(R.menu.share_menu, menu);
 
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.menu_item_share);
-
-
         // Fetch and store ShareActionProvider
+        mShareIntent = new Intent();
+        mShareIntent.setAction(Intent.ACTION_SEND);
+        mShareIntent.setType("text/plain");
+        mShareIntent.putExtra(Intent.EXTRA_TEXT, "From me to you, this text is new.");
+
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(mShareIntent);
+        }
 
         // Return true to display menu
-
         return true;
     }
 
-    // Call to update the share intent
-    private void setShareIntent(Intent shareIntent) {
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
-        sendIntent.setType("text/plain");
-        startActivity(sendIntent);
-        shareIntent.getStringExtra(cool);
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(shareIntent);
-        }
-    }
 }
