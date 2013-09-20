@@ -58,27 +58,14 @@ String cool= "cool";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         PickGalleryImage();
         GridView gridview = (GridView) findViewById(R.id.gridView);
         gridview.setAdapter(new ImageAdapter(this));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
-            }
-        });
-//        GridView gridView = (GridView) findViewById(R.id.gridView);
-//        gridView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
+                //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
 
-//            }
-//        });
-          TextView textView2 = (TextView) findViewById(R.id.textView2);
-          textView2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {///
                 int xSource=0, ySource =0;
                 try {
                     // Load brush bitmap
@@ -93,13 +80,13 @@ String cool= "cool";
                     //brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
                     brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
 
-                    // Try a rotation
-                    //Matrix matrix=new Matrix();
+                    // Apply a rotation
+                    Matrix matrix=new Matrix();
                     //imageView.setScaleType(ImageView.ScaleType.MATRIX);   //required
                     //matrix.postRotate((float) angle, pivX, pivY);
                     //matrix.postRotate( 180f, imageView.getDrawable().getBounds().width()/2, imageView.getDrawable().getBounds().height()/2);
                     //imageView.setImageMatrix(matrix);
-                    Matrix matrix = new Matrix();
+
 
                     int widthSourceImage = imageBitmap.getWidth();
                     int lengthSourceImage = imageBitmap.getHeight();
@@ -140,12 +127,12 @@ String cool= "cool";
                             theBrushes[x][y] = new brush();
 
                             // On a Grid
-                            theBrushes[x][y].x = (x*widthBrushImage)  + (widthBrushImage /2);
-                            theBrushes[x][y].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                            //theBrushes[x][y].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                            //theBrushes[x][y].y = (y*lengthBrushImage) + (lengthBrushImage/2);
 
                             // Randomly distributed
-                            //theBrushes[x][y].x = (int) (Math.random() * widthSourceImage)-1;
-                            //theBrushes[x][y].y = (int) (Math.random() * lengthSourceImage)-1;
+                            theBrushes[x][y].x = (int) (Math.random() * widthSourceImage)-1;
+                            theBrushes[x][y].y = (int) (Math.random() * lengthSourceImage)-1;
 
                             // Sample the source image to get color of the brush
                             theBrushes[x][y].color = imageBitmap.getPixel(theBrushes[x][y].x, theBrushes[x][y].y);
@@ -158,13 +145,13 @@ String cool= "cool";
                             theBrushes[x][y].size = 1 - theHSVColor[2];
 
                             // Size = constant
-                            theBrushes[x][y].size = (float) .3;
+                            theBrushes[x][y].size = (float) .2;
 
                             // Angle = color
-                            //theBrushes[x][y].angle = theHSVColor[0];
+                            //theBrushes[x][y].angle = 10; //theHSVColor[2];
 
                             //Angle = distance from top
-                            theBrushes[x][y].angle = (theBrushes[x][y].x / (float) widthSourceImage) * 10;
+                            theBrushes[x][y].angle = (theBrushes[x][y].y / (float) widthSourceImage) * 180;
 
                         }
                     }
@@ -177,6 +164,7 @@ String cool= "cool";
                         for (int j = 0; j <= lengthNumBrushes; j++) {
 
                             // Rotate the brush
+                            matrix.reset();
                             matrix.postRotate(theBrushes[i][j].angle, brushBitMap.getWidth()/2, brushBitMap.getHeight()/2 );
                             rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
                                     matrix, true);

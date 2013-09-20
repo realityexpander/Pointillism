@@ -28,12 +28,6 @@
             android:background="#ffffff" />
     </HorizontalScrollView>
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/textView2" />
-
     <GridView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
