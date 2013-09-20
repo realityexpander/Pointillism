@@ -1,7 +1,7 @@
 package com.realityexpander.pointillism;
 
-import android.content.Context;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.database.Cursor;
@@ -9,12 +9,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
 import android.provider.MediaStore;
-import android.support.v7.internal.view.menu.MenuView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,15 +20,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.HorizontalScrollView;
-import android.widget.ShareActionProvider;
-import android.widget.Toast;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
-import android.widget.TextView;
-import android.widget.Toast;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -353,6 +343,26 @@ String cool= "cool";
         startActivityForResult(i, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+
+        }
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.gallery_button:
+                PickGalleryImage();
+                return true;
+
+            //do something when this button is pressed
+
+//            case R.id.action_compose:
+//                composeMessage();
+//                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
