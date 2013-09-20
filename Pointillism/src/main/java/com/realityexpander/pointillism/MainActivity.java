@@ -17,16 +17,19 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.HorizontalScrollView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import java.io.File;
@@ -46,7 +49,7 @@ String cool= "cool";
 
     public Bitmap imageBitmap;
 
-    private LinearLayout container;
+    private HorizontalScrollView container;
     private int currentX;
     private int currentY;
 
@@ -57,19 +60,25 @@ String cool= "cool";
 
 
         PickGalleryImage();
-//        GridView gridview = (GridView) findViewById(R.id.gridView);
-//        gridview.setAdapter(new ImageAdapter(this));
-//
-//        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-//                Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+        GridView gridview = (GridView) findViewById(R.id.gridView);
+        gridview.setAdapter(new ImageAdapter(this));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+            }
+        });
+//        GridView gridView = (GridView) findViewById(R.id.gridView);
+//        gridView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+
 //            }
 //        });
-
-        TextView textView2 = (TextView) findViewById(R.id.textView2);
-        textView2.setOnClickListener(new View.OnClickListener() {
+          TextView textView2 = (TextView) findViewById(R.id.textView2);
+          textView2.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {///
                 int xSource=0, ySource =0;
                 try {
                     // Load brush bitmap
@@ -250,7 +259,7 @@ String cool= "cool";
 
 
 
-        container = (LinearLayout) findViewById(R.id.Container);
+        container = (HorizontalScrollView) findViewById(R.id.Container);
         //container.scrollTo(220, 400);
 
     }
