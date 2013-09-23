@@ -1,41 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
 
+<RelativeLayout
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+xmlns:android="http://schemas.android.com/apk/res/android">
+<FrameLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/master_frame">
+</FrameLayout>
 
-    <HorizontalScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="418dp"
-        android:id="@+id/Container"
-        android:layout_marginBottom="-1dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/linearLayout"
-        android:layout_gravity="center" >
+<GridView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignBottom="@+id/master_frame"
+    android:id="@+id/gridView"
+    android:choiceMode="singleChoice"
+    android:numColumns="5"
+    android:stackFromBottom="false"
+    android:layout_gravity="bottom" />
+<HorizontalScrollView
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/horizontalScrollView"
+    android:layout_gravity="center_horizontal|top"
+    android:layout_above="@+id/gridView" >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="418dp"
-            android:id="@+id/imageViewEffect"
-            android:src="@drawable/ic_launcher"
-            android:layout_marginBottom="-1dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/linearLayout"
-            android:background="#ffffff" />
-    </HorizontalScrollView>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:adjustViewBounds="false"
+        android:src="@drawable/ic_launcher"
+        android:cropToPadding="false" />
 
-    <GridView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/gridView"
+</HorizontalScrollView>
 
-        android:numColumns="5"
-        android:gravity="bottom|center"
-        android:background="#956ff7" />
-
-
-</LinearLayout>
+</RelativeLayout>
