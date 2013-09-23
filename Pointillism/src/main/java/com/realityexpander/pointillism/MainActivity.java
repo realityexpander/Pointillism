@@ -226,7 +226,7 @@ String cool= "cool";
                     }
 
                     // Set it to the UI
-                    ImageView imageView = (ImageView) findViewById(R.id.imageViewEffect);
+                    ImageView imageView = (ImageView) findViewById(R.id.imageView);
                     imageView.setImageBitmap(imageBitmap);
                 } catch (Exception e) {
                     Log.e("imageBitmap:", "problem here");
@@ -239,7 +239,7 @@ String cool= "cool";
 
 
 
-        container = (HorizontalScrollView) findViewById(R.id.Container);
+        container = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
         //container.scrollTo(220, 400);
 
     }
@@ -275,7 +275,7 @@ String cool= "cool";
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
-            ImageView imageView = (ImageView) findViewById(R.id.imageViewEffect);
+            ImageView imageView = (ImageView) findViewById(R.id.imageView);
             //imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
 
             Bitmap tempBitmap;
