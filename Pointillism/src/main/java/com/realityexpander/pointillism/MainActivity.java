@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -345,23 +346,23 @@ String cool= "cool";
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
 
-        }
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.gallery_button:
                 PickGalleryImage();
                 return true;
 
-            //do something when this button is pressed
 
-//            case R.id.action_compose:
-//                composeMessage();
-//                return true;
+
+
+
             default:
                 return super.onOptionsItemSelected(item);
+
         }
+
+
     }
 
     @Override
@@ -373,19 +374,63 @@ String cool= "cool";
 
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.menu_item_share);
-        // Fetch and store ShareActionProvider
-        mShareIntent = new Intent();
-        mShareIntent.setAction(Intent.ACTION_SEND);
-        mShareIntent.setType("text/plain");
-        mShareIntent.putExtra(Intent.EXTRA_TEXT, "From me to you, this text is new.");
 
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
         if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(mShareIntent);
+            mShareActionProvider.setShareIntent(createShareIntent());
         }
+        // Fetch and store ShareActionProvider
+//        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+//        sendIntent.setType("image/jpeg");
+//        sendIntent.putExtra(Intent.EXTRA_STREAM, "IDONTKNOW");
+//        sendIntent.putExtra(Intent.EXTRA_TEXT,
+//                "See my captured picture - wow :)");
+//        startActivity(Intent.createChooser(sendIntent, "share"));
 
-        // Return true to display menu
+//        mShareIntent = new Intent();
+//        mShareIntent.setAction(Intent.ACTION_SEND);
+//        mShareIntent.setType("image/jpeg");
+//        mShareIntent.putExtra(Intent.EXTRA_TEXT, "I want this to be an image");
+//
+
+//        // Return true to display menu
         return true;
+    }
+
+    private Intent createShareIntent(){
+        Intent shareIntent = null;
+        //save to  cache out dir
+        // put uri into extra_stream (uri = path +b filename)
+
+        File outputDir = getApplicationContext().getCacheDir();
+        //File outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        //File outputDir = getApplicationContext().getExternalMediaDir();
+
+        File imageBitmapFile = new File(outputDir, "temp.png");
+        FileOutputStream fileOutPutStream = null;
+        try {
+            outputDir.mkdirs();
+
+            fileOutPutStream = new FileOutputStream(imageBitmapFile);
+            //fileOutPutStream = new openFileOutput(imageBitmapFile, Context.MODE_WORLD_READABLE);
+            //fileOutPutStream.setReadable(true);
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 80, fileOutPutStream);
+            fileOutPutStream.flush();
+            fileOutPutStream.close();
+
+            shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            //Uri fileURI = Uri.parse("file://" + imageBitmapFile.getAbsolutePath());
+            Uri fileURI = Uri.fromFile(getFileStreamPath("temp.png"));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileURI);
+            shareIntent.setType("image/png");
+            //startActivity(Intent.createChooser(shareIntent, "send picture using"));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return shareIntent;
+
     }
 
 }
