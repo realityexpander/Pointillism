@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+
 
 public class MainActivity extends Activity {
 
@@ -229,6 +231,7 @@ String cool= "cool";
                     // Set it to the UI
                     ImageView imageView = (ImageView) findViewById(R.id.imageView);
                     imageView.setImageBitmap(imageBitmap);
+                    createTempImageFile();
                 } catch (Exception e) {
                     Log.e("imageBitmap:", "problem here");
                     Log.e("imageBitmap: xSource", Integer.toString(xSource));
@@ -353,10 +356,6 @@ String cool= "cool";
                 PickGalleryImage();
                 return true;
 
-
-
-
-
             default:
                 return super.onOptionsItemSelected(item);
 
@@ -379,58 +378,48 @@ String cool= "cool";
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(createShareIntent());
         }
-        // Fetch and store ShareActionProvider
-//        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-//        sendIntent.setType("image/jpeg");
-//        sendIntent.putExtra(Intent.EXTRA_STREAM, "IDONTKNOW");
-//        sendIntent.putExtra(Intent.EXTRA_TEXT,
-//                "See my captured picture - wow :)");
-//        startActivity(Intent.createChooser(sendIntent, "share"));
-
-//        mShareIntent = new Intent();
-//        mShareIntent.setAction(Intent.ACTION_SEND);
-//        mShareIntent.setType("image/jpeg");
-//        mShareIntent.putExtra(Intent.EXTRA_TEXT, "I want this to be an image");
-//
 
 //        // Return true to display menu
         return true;
     }
 
-    private Intent createShareIntent(){
+    private Intent createShareIntent() {
         Intent shareIntent = null;
-        //save to  cache out dir
+        // save to  cache out dir
         // put uri into extra_stream (uri = path +b filename)
+        Uri fileURI;
 
-        File outputDir = getApplicationContext().getCacheDir();
-        //File outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        //File outputDir = getApplicationContext().getExternalMediaDir();
+        fileURI = createTempImageFile();
+        if ( fileURI != null  ) {
 
-        File imageBitmapFile = new File(outputDir, "temp.png");
+            shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileURI);
+            //shareIntent.setType("image/png");
+            shareIntent.setType("image/jpeg");
+            //startActivity(Intent.createChooser(shareIntent, "send picture using"));
+        }
+        return shareIntent;
+    }
+
+    private Uri createTempImageFile() {
+        File outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File imageBitmapFile = new File(outputDir, "temp.jpg");
         FileOutputStream fileOutPutStream = null;
+        Uri fileURI = Uri.parse("file://" + imageBitmapFile.getAbsolutePath());
         try {
             outputDir.mkdirs();
 
             fileOutPutStream = new FileOutputStream(imageBitmapFile);
-            //fileOutPutStream = new openFileOutput(imageBitmapFile, Context.MODE_WORLD_READABLE);
-            //fileOutPutStream.setReadable(true);
-            imageBitmap.compress(Bitmap.CompressFormat.PNG, 80, fileOutPutStream);
+            //imageBitmap.compress(Bitmap.CompressFormat.PNG, 80, fileOutPutStream);
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 80, fileOutPutStream);
             fileOutPutStream.flush();
             fileOutPutStream.close();
-
-            shareIntent = new Intent();
-            shareIntent.setAction(Intent.ACTION_SEND);
-            //Uri fileURI = Uri.parse("file://" + imageBitmapFile.getAbsolutePath());
-            Uri fileURI = Uri.fromFile(getFileStreamPath("temp.png"));
-            shareIntent.putExtra(Intent.EXTRA_STREAM, fileURI);
-            shareIntent.setType("image/png");
-            //startActivity(Intent.createChooser(shareIntent, "send picture using"));
-
-        } catch (IOException e) {
+            return fileURI; // result is OK
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return shareIntent;
-
+        return null; // failure
     }
 
 }
