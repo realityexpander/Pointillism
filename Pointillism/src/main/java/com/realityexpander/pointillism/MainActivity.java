@@ -396,20 +396,25 @@ String cool= "cool";
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_STREAM, fileURI);
             //shareIntent.setType("image/png");
-            shareIntent.setType("image/jpeg");
+            shareIntent.setType("image/*");
             //startActivity(Intent.createChooser(shareIntent, "send picture using"));
         }
         return shareIntent;
     }
 
     private Uri createTempImageFile() {
-        File outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File imageBitmapFile = new File(outputDir, "temp.jpg");
+        File outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) ;
+        //File outputDir = Environment.getDataDirectory(); //getPackageName();
+
+        String myPath;
+        myPath = outputDir.getAbsolutePath() + File.separator + getPackageName() + File.separator;
+        File newDirectory = new File(myPath);
+        newDirectory.mkdirs();
+
+        File imageBitmapFile = new File(myPath, "temp.jpg");
         FileOutputStream fileOutPutStream = null;
         Uri fileURI = Uri.parse("file://" + imageBitmapFile.getAbsolutePath());
         try {
-            outputDir.mkdirs();
-
             fileOutPutStream = new FileOutputStream(imageBitmapFile);
             //imageBitmap.compress(Bitmap.CompressFormat.PNG, 80, fileOutPutStream);
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 80, fileOutPutStream);
