@@ -1,6 +1,7 @@
 package com.realityexpander.pointillism;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
@@ -12,6 +13,7 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -35,8 +37,10 @@ import java.nio.channels.FileChannel;
 
 public class MainActivity extends Activity {
 
+
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
+
 
 String cool= "cool";
 
@@ -47,19 +51,43 @@ String cool= "cool";
     private HorizontalScrollView container;
     private int currentX;
     private int currentY;
+    private static final int MAX_SPLASH_SECONDS = 3;
+    private Dialog splashDialog;
+
+    private class StateSaver {
+        private boolean showSplashScreen = true;
+        // Other save state info here...
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PickGalleryImage();
+        StateSaver data = (StateSaver) getLastNonConfigurationInstance();
+        if (data != null) { // "all this has happened before"
+            if (data.showSplashScreen ) { // and we didn't already finish
+                showSplashScreen();
+            }
+            setContentView(R.layout.activity_main);
+            // Do any UI rebuilding here using saved stated
+        } else {
+            showSplashScreen();
+            setContentView(R.layout.activity_main);
 
-        GridView gridview = (GridView) findViewById(R.id.gridView);
-        gridview.setAdapter(new ImageAdapter(this));
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+
+
+            GridView gridview = (GridView) findViewById(R.id.gridView);
+            gridview.setAdapter(new ImageAdapter(this));
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+            // Start any heavy-duty loading here, but on its own thread
+        }
+    });
+
+
+
 
                 int xSource = 0, ySource = 0;
                 try {
@@ -288,16 +316,50 @@ String cool= "cool";
                     Log.e("imageBitmap: ySource", Integer.toString(ySource));
                 }
             }
-
-        });
-
-
-
         container = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
         //container.scrollTo(220, 400);
 
+        }
+
+
+
+
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        StateSaver data = new StateSaver();
+        // save important data into this object
+
+        if (splashDialog != null) {
+            data.showSplashScreen = true;
+            removeSplashScreen();
+            PickGalleryImage();
+        }
+        return data;
     }
 
+    private void removeSplashScreen() {
+        if (splashDialog != null) {
+            splashDialog.dismiss();
+            splashDialog = null;
+            PickGalleryImage();
+        }
+    }
+
+    private void showSplashScreen() {
+        splashDialog = new Dialog(this);
+        splashDialog.setContentView(R.layout.splashscreen);
+        splashDialog.setCancelable(false);
+        splashDialog.show();
+
+        // Start background Handler to cancel it, to be save
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                removeSplashScreen();
+            }
+        }, MAX_SPLASH_SECONDS * 1000);
+    }
     public static Bitmap getBitmapFromAsset(Context context, String strName) {
         AssetManager assetManager = context.getAssets();
 
