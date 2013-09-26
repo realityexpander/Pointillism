@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.URL;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -59,6 +61,33 @@ String cool= "cool";
         // Other save state info here...
     }
 
+    class brush {
+        int x;
+        int y;
+        int color;
+        float size;  // 0->1
+        float angle; // 0->1
+        int opacity;
+    }
+
+    // Painting variables
+    int mEffectAlgorithm;
+    Matrix matrix;
+    int widthSourceImage ;
+    int lengthSourceImage ;
+
+    Bitmap brushBitMap, rotatedBitmap;
+    int sourceSample[][];
+    int brushSample;
+    int brushRed, brushGrn, brushBlu;
+    int outputRed, outputGrn, outputBlu;
+    int widthBrushImage, lengthBrushImage;
+    int widthNumBrushes;
+    int lengthNumBrushes;
+    brush[] theBrushes ;
+    float[] theHSVColor;
+    int xSource, ySource;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,40 +98,26 @@ String cool= "cool";
             if (data.showSplashScreen ) { // and we didn't already finish
                 showSplashScreen();
             }
-            setContentView(R.layout.activity_main);
-            // Do any UI rebuilding here using saved stated
         } else {
             showSplashScreen();
             setContentView(R.layout.activity_main);
-
-
-
-            GridView gridview = (GridView) findViewById(R.id.gridView);
-            gridview.setAdapter(new ImageAdapter(this));
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
-            // Start any heavy-duty loading here, but on its own thread
         }
-    });
 
 
+        GridView gridview = (GridView) findViewById(R.id.gridView);
+        gridview.setAdapter(new ImageAdapter(this));
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                //Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+                // Start any heavy-duty loading here, but on its own thread
 
-
-                int xSource = 0, ySource = 0;
+                mEffectAlgorithm = position;
                 try {
                     // Load brush bitmap
-                    Bitmap brushBitMap, rotatedBitmap;
-                    int sourceSample[][];
-                    int brushSample;
-                    int brushRed, brushGrn, brushBlu;
-                    int outputRed, outputGrn, outputBlu;
-                    int widthBrushImage, lengthBrushImage;
-
                     //brushBitMap = getBitmapFromAsset(getApplicationContext(), "brush1");
 
                     switch( position ){
-                    //brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
+                        //brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
                         case 0:
                             brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
                             break;
@@ -119,208 +134,210 @@ String cool= "cool";
                             brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush5);
                             break;
                         default:
-                        brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
                     }
 
                     // Apply a rotation
-                    Matrix matrix = new Matrix();
+                    matrix = new Matrix();
                     //imageView.setScaleType(ImageView.ScaleType.MATRIX);   //required
                     //matrix.postRotate((float) angle, pivX, pivY);
                     //matrix.postRotate( 180f, imageView.getDrawable().getBounds().width()/2, imageView.getDrawable().getBounds().height()/2);
                     //imageView.setImageMatrix(matrix);
 
-
-                    int widthSourceImage = imageBitmap.getWidth();
-                    int lengthSourceImage = imageBitmap.getHeight();
+                    widthSourceImage = imageBitmap.getWidth();
+                    lengthSourceImage = imageBitmap.getHeight();
 
                     // Create the array of brushes
                     widthBrushImage = brushBitMap.getWidth();
                     lengthBrushImage = brushBitMap.getHeight();
-                    int widthNumBrushes = widthSourceImage / widthBrushImage;
-                    int lengthNumBrushes = lengthSourceImage / lengthBrushImage;
+                    widthNumBrushes = widthSourceImage / widthBrushImage;
+                    lengthNumBrushes = lengthSourceImage / lengthBrushImage;
 
-                    Log.e("imageBitmap: widthSourceImage", Integer.toString(widthSourceImage));
-                    Log.e("imageBitmap: lengthSourceImage", Integer.toString(lengthSourceImage));
-                    Log.e("imageBitmap: widthBrushImage", Integer.toString(widthBrushImage));
-                    Log.e("imageBitmap: lengthBrushImage", Integer.toString(lengthBrushImage));
+                    Log.e("OnItemClickGridView: widthSourceImage", Integer.toString(widthSourceImage));
+                    Log.e("OnItemClickGridView: lengthSourceImage", Integer.toString(lengthSourceImage));
+                    Log.e("OnItemClickGridView: widthBrushImage", Integer.toString(widthBrushImage));
+                    Log.e("OnItemClickGridView: lengthBrushImage", Integer.toString(lengthBrushImage));
 
                     // TESTING CHANGE TODO
                     //widthNumBrushes = 5;
                     //lengthNumBrushes = 5;
 
-                    class brush {
-                        int x;
-                        int y;
-                        int color;
-                        float size;  // 0->1
-                        float angle; // 0->1
-                        int opacity;
-                    }
-
                     // Brush sampled colors & brush locations
-                    brush[] theBrushes = new brush[(widthNumBrushes + 1) * (lengthNumBrushes + 1)];
-                    float[] theHSVColor = new float[3];
+                    theBrushes = new brush[(widthNumBrushes + 1) * (lengthNumBrushes + 1)];
+                    theHSVColor = new float[3];
 
-                    // Sample the image at the brush center points into the brushes array
-                    int i=0;
-                    int totalNumBrushes=0;
+                    new PaintImageTask().execute();
 
-                    for (int x = 0; x <= widthNumBrushes; x++) {
-                        for (int y = 0; y <= lengthNumBrushes; y++) {
+                } catch (Exception e) {
+                    Log.e("OnItemClickGridView:", "problem here");
+                }
+            }
 
-                            // Set the location of the brush
-                            theBrushes[i] = new brush();
+        });
 
-                            switch(position) {
-                                case 0:
-                                    // Randomly distributed
-                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
-                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
 
-                                    // Sample the source image to get color of the brush
-                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+        container = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
+        //container.scrollTo(220, 400);
 
-                                    // Size = brightness (value)
-                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
-                                    theBrushes[i].size = 1 - theHSVColor[2];
+        }
 
-                                    // Size = constant
-                                    theBrushes[i].size = (float) .2;
+    private class PaintImageTask extends AsyncTask<URL, Integer, Long> {
 
-                                    // Angle = color
-                                    theBrushes[i].angle = theHSVColor[2];
+        protected Long doInBackground(URL... urls) {
 
+            try {
+
+                // Sample the image at the brush center points into the brushes array
+                int i=0;
+                int totalNumBrushes=0;
+                for (int x = 0; x <= widthNumBrushes; x++) {
+                    for (int y = 0; y <= lengthNumBrushes; y++) {
+                        // Set the location of the brush
+                        theBrushes[i] = new brush();
+
+                        switch(mEffectAlgorithm) {
+                            case 0:
+                                // Randomly distributed
+                                theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                // Sample the source image to get color of the brush
+                                theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                                // Size = brightness (value)
+                                Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                theBrushes[i].size = 1 - theHSVColor[2];
+                                // Size = constant
+                                theBrushes[i].size = (float) .2;
+                                // Angle = color
+                                theBrushes[i].angle = theHSVColor[2];
                                 break;
 
-                                case 1:
-                                    // On a Grid
-                                    //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
-                                    //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                            case 1:
+                                // On a Grid
+                                //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                                //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                                // Randomly distributed
+                                theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                // Sample the source image to get color of the brush
+                                theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                                // Size = random
+                                theBrushes[i].size = (float) Math.random() / 2;
+                                // Size = brightness (value)
+                                Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                theBrushes[i].size = 1 - theHSVColor[2];
+                                //Angle = distance from top
+                                theBrushes[i].angle = (theBrushes[i].y / (float) widthSourceImage) * 180;
+                                break;
 
-                                    // Randomly distributed
-                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
-                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                            case 2:
+                                break;
 
-                                    // Sample the source image to get color of the brush
-                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                            case 3:
+                                break;
 
-                                    // Size = random
-                                    theBrushes[i].size = (float) Math.random() / 2;
+                            case 4:
+                                break;
 
-                                    // Size = brightness (value)
-                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
-                                    theBrushes[i].size = 1 - theHSVColor[2];
-
-                                    //Angle = distance from top
-                                    theBrushes[i].angle = (theBrushes[i].y / (float) widthSourceImage) * 180;
-                                    break;
-
-                                case 2:
-                                    break;
-
-                                case 3:
-                                    break;
-
-                                case 4:
-                                    break;
-
-                                default:
-                                    break;
-                            }
-
-                            i++;
-
+                            default:
+                                break;
                         }
+
+                        i++;
                     }
+                }
 
-                    totalNumBrushes = i;
+                totalNumBrushes = i;
 
-                    int brushXStart, brushXEnd, brushYStart, brushYEnd;
-                    float brushSizeMult;
-                    for ( int n = 0; n <= totalNumBrushes; n++) {
+                int brushXStart, brushXEnd, brushYStart, brushYEnd;
+                float brushSizeMult;
+                for ( int n = 0; n <= totalNumBrushes; n++) {
 
-                        // Rotate the brush
-                        matrix.reset();
-                        matrix.postRotate(theBrushes[n].angle, brushBitMap.getWidth() / 2, brushBitMap.getHeight() / 2);
-                        rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
-                                matrix, true);
-                        widthBrushImage = rotatedBitmap.getWidth();
-                        lengthBrushImage = rotatedBitmap.getHeight();
+                    // Rotate the brush
+                    matrix.reset();
+                    matrix.postRotate(theBrushes[n].angle, brushBitMap.getWidth() / 2, brushBitMap.getHeight() / 2);
+                    rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
+                            matrix, true);
+                    widthBrushImage = rotatedBitmap.getWidth();
+                    lengthBrushImage = rotatedBitmap.getHeight();
 
-                        brushXStart = theBrushes[n].x - (int) ((float) widthBrushImage / 2.0);
-                        brushXEnd = theBrushes[n].x + (int) ((float) widthBrushImage / 2.0);
-                        brushYStart = theBrushes[n].y - (int) ((float) lengthBrushImage / 2.0);
-                        brushYEnd = theBrushes[n].y + (int) ((float) lengthBrushImage / 2.0);
+                    brushXStart = theBrushes[n].x - (int) ((float) widthBrushImage / 2.0);
+                    brushXEnd = theBrushes[n].x + (int) ((float) widthBrushImage / 2.0);
+                    brushYStart = theBrushes[n].y - (int) ((float) lengthBrushImage / 2.0);
+                    brushYEnd = theBrushes[n].y + (int) ((float) lengthBrushImage / 2.0);
 
-                        brushRed = (theBrushes[n].color & 0x00FF0000) >>> 16;
-                        brushGrn = (theBrushes[n].color & 0x0000FF00) >>> 8;
-                        brushBlu = (theBrushes[n].color & 0x000000FF);
+                    brushRed = (theBrushes[n].color & 0x00FF0000) >>> 16;
+                    brushGrn = (theBrushes[n].color & 0x0000FF00) >>> 8;
+                    brushBlu = (theBrushes[n].color & 0x000000FF);
 
-                        // Render the brushes
-                        int x, y;
+                    // Render the brushes
 
-                        int brushSampleX, brushSampleY;
-                        int sourcePixel, outColor;
-                        brushSizeMult = ((float) 1 / theBrushes[n].size);
+                    int brushSampleX, brushSampleY;
+                    int sourcePixel, outColor;
+                    brushSizeMult = ((float) 1 / theBrushes[n].size);
 
-                        for (xSource = brushXStart, x = 0; xSource <= brushXEnd; xSource++, x++) {
-                            for (ySource = brushYStart, y = 0; ySource <= brushYEnd; ySource++, y++) {
-                                if (xSource < widthSourceImage) {
-                                    if (ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
+                    int x, y;
+                    for (xSource = brushXStart, x = 0; xSource <= brushXEnd; xSource++, x++) {
+                        for (ySource = brushYStart, y = 0; ySource <= brushYEnd; ySource++, y++) {
+                            if (xSource < widthSourceImage) {
+                                if (ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
 
-                                        sourcePixel = imageBitmap.getPixel(xSource, ySource);
+                                    sourcePixel = imageBitmap.getPixel(xSource, ySource);
 
-                                        brushSampleX = (int) ((float) x * ((brushSizeMult) / 2.0));
-                                        brushSampleY = (int) ((float) y * ((brushSizeMult) / 2.0));
-                                        brushSample = 0;
-                                        if (brushSampleX < widthBrushImage && brushSampleX >= 0) {
-                                            if (brushSampleY < lengthBrushImage && brushSampleY >= 0) {
+                                    brushSampleX = (int) ((float) x * ((brushSizeMult) / 2.0));
+                                    brushSampleY = (int) ((float) y * ((brushSizeMult) / 2.0));
+                                    brushSample = 0;
+                                    if (brushSampleX < widthBrushImage && brushSampleX >= 0) {
+                                        if (brushSampleY < lengthBrushImage && brushSampleY >= 0) {
 
-                                                brushSample = 255 - rotatedBitmap.getPixel(brushSampleX, brushSampleY) & 0x000000FF;
+                                            brushSample = 255 - rotatedBitmap.getPixel(brushSampleX, brushSampleY) & 0x000000FF;
 
-                                                //outputRed = (brushRed * (255-brushSample)) >>> 8;
-                                                //outputGrn = (brushGrn * (255-brushSample)) >>> 8;
-                                                //outputBlu = (brushBlu * (255-brushSample)) >>> 8;
+                                            //outputRed = (brushRed * (255-brushSample)) >>> 8;
+                                            //outputGrn = (brushGrn * (255-brushSample)) >>> 8;
+                                            //outputBlu = (brushBlu * (255-brushSample)) >>> 8;
 
-                                                if (brushSample > 0) {
-                                                    outputRed = ((((sourcePixel & 0x00FF0000) >>> 16) * (brushSample)) +
-                                                            (brushRed * (255-brushSample))) >>> 8;
-                                                    outputGrn = ((((sourcePixel & 0x0000FF00) >>> 8) * (brushSample)) +
-                                                            (brushGrn * (255-brushSample))) >>> 8;
-                                                    outputBlu = ((((sourcePixel & 0x000000FF)) * (brushSample)) +
-                                                            (brushBlu * (255-brushSample))) >>> 8;
+                                            if (brushSample > 0) {
+                                                outputRed = ((((sourcePixel & 0x00FF0000) >>> 16) * (brushSample)) +
+                                                        (brushRed * (255-brushSample))) >>> 8;
+                                                outputGrn = ((((sourcePixel & 0x0000FF00) >>> 8) * (brushSample)) +
+                                                        (brushGrn * (255-brushSample))) >>> 8;
+                                                outputBlu = ((((sourcePixel & 0x000000FF)) * (brushSample)) +
+                                                        (brushBlu * (255-brushSample))) >>> 8;
 
-                                                    //outputRed = 255 - brushSample; // testing
-                                                    outColor = 0xFF000000 | (outputRed << 16) | (outputGrn << 8) | outputBlu;
+                                                //outputRed = 255 - brushSample; // testing
+                                                outColor = 0xFF000000 | (outputRed << 16) | (outputGrn << 8) | outputBlu;
 
-                                                    imageBitmap.setPixel(xSource, ySource, outColor);
-                                                }
+                                                imageBitmap.setPixel(xSource, ySource, outColor);
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }  // n
+                    }
+                }  // n
 
-                    createTempImageFile();
-
-                    // Set it to the UI
-                    ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                    imageView.setImageBitmap(imageBitmap);
-
-
-                } catch (Exception e) {
-                    Log.e("imageBitmap:", "problem here");
-                    Log.e("imageBitmap: xSource", Integer.toString(xSource));
-                    Log.e("imageBitmap: ySource", Integer.toString(ySource));
-                }
+            } catch (Exception e) {
+                Log.e("imageBitmap:", "problem here");
+                Log.e("imageBitmap: xSource", Integer.toString(xSource));
+                Log.e("imageBitmap: ySource", Integer.toString(ySource));
             }
-        container = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
-        //container.scrollTo(220, 400);
 
+            return null; // TODO return something useful
         }
 
+        protected void onProgressUpdate(Integer... progress) {
+            //setProgressPercent(progress[0]);
+        }
+
+        protected void onPostExecute(Long result) {
+            //showDialog("Downloaded " + result + " bytes");
+            createTempImageFile();
+
+            // Set it to the UI
+            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+            imageView.setImageBitmap(imageBitmap);
+        }
+    }
 
 
 
@@ -472,8 +489,6 @@ String cool= "cool";
                 return super.onOptionsItemSelected(item);
 
         }
-
-
     }
 
     @Override
