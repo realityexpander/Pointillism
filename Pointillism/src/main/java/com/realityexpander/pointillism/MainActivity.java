@@ -72,8 +72,27 @@ String cool= "cool";
                     int widthBrushImage, lengthBrushImage;
 
                     //brushBitMap = getBitmapFromAsset(getApplicationContext(), "brush1");
+
+                    switch( position ){
                     //brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
-                    brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
+                        case 0:
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
+                            break;
+                        case 1:
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
+                            break;
+                        case 2:
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush3);
+                            break;
+                        case 3:
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush4);
+                            break;
+                        case 4:
+                            brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush5);
+                            break;
+                        default:
+                        brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
+                    }
 
                     // Apply a rotation
                     Matrix matrix = new Matrix();
@@ -111,114 +130,142 @@ String cool= "cool";
                     }
 
                     // Brush sampled colors & brush locations
-                    brush[][] theBrushes = new brush[widthNumBrushes + 1][lengthNumBrushes + 1];
+                    brush[] theBrushes = new brush[(widthNumBrushes + 1) * (lengthNumBrushes + 1)];
                     float[] theHSVColor = new float[3];
 
                     // Sample the image at the brush center points into the brushes array
+                    int i=0;
+                    int totalNumBrushes=0;
+
                     for (int x = 0; x <= widthNumBrushes; x++) {
                         for (int y = 0; y <= lengthNumBrushes; y++) {
 
                             // Set the location of the brush
-                            theBrushes[x][y] = new brush();
+                            theBrushes[i] = new brush();
 
-                            // On a Grid
-                            //theBrushes[x][y].x = (x*widthBrushImage)  + (widthBrushImage /2);
-                            //theBrushes[x][y].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                            switch(position) {
+                                case 0:
+                                    // Randomly distributed
+                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
 
-                            // Randomly distributed
-                            theBrushes[x][y].x = (int) (Math.random() * widthSourceImage) - 1;
-                            theBrushes[x][y].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
 
-                            // Sample the source image to get color of the brush
-                            theBrushes[x][y].color = imageBitmap.getPixel(theBrushes[x][y].x, theBrushes[x][y].y);
+                                    // Size = brightness (value)
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theBrushes[i].size = 1 - theHSVColor[2];
 
-                            // Size = random
-                            //theBrushes[x][y].size = (float) Math.random();
+                                    // Size = constant
+                                    theBrushes[i].size = (float) .2;
 
-                            // Size = brightness (value)
-                            Color.colorToHSV(theBrushes[x][y].color, theHSVColor);
-                            theBrushes[x][y].size = 1 - theHSVColor[2];
+                                    // Angle = color
+                                    theBrushes[i].angle = theHSVColor[2];
 
-                            // Size = constant
-                            theBrushes[x][y].size = (float) .2;
+                                break;
 
-                            // Angle = color
-                            theBrushes[x][y].angle = theHSVColor[2];
+                                case 1:
+                                    // On a Grid
+                                    //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                                    //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
 
-                            //Angle = distance from top
-                            //theBrushes[x][y].angle = (theBrushes[x][y].y / (float) widthSourceImage) * 180;
+                                    // Randomly distributed
+                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+
+                                    // Size = random
+                                    theBrushes[i].size = (float) Math.random() / 2;
+
+                                    // Size = brightness (value)
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theBrushes[i].size = 1 - theHSVColor[2];
+
+                                    //Angle = distance from top
+                                    theBrushes[i].angle = (theBrushes[i].y / (float) widthSourceImage) * 180;
+                                    break;
+
+                                case 2:
+                                    break;
+
+                                case 3:
+                                    break;
+
+                                case 4:
+                                    break;
+
+                                default:
+                                    break;
+                            }
+
+                            i++;
 
                         }
                     }
 
+                    totalNumBrushes = i;
 
                     int brushXStart, brushXEnd, brushYStart, brushYEnd;
                     float brushSizeMult;
-                    float brushAngle;
-                    for (int i = 0; i <= widthNumBrushes; i++) {
-                        for (int j = 0; j <= lengthNumBrushes; j++) {
+                    for ( int n = 0; n <= totalNumBrushes; n++) {
 
-                            // Rotate the brush
-                            matrix.reset();
-                            matrix.postRotate(theBrushes[i][j].angle, brushBitMap.getWidth() / 2, brushBitMap.getHeight() / 2);
-                            rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
-                                    matrix, true);
-                            widthBrushImage = rotatedBitmap.getWidth();
-                            lengthBrushImage = rotatedBitmap.getHeight();
+                        // Rotate the brush
+                        matrix.reset();
+                        matrix.postRotate(theBrushes[n].angle, brushBitMap.getWidth() / 2, brushBitMap.getHeight() / 2);
+                        rotatedBitmap = Bitmap.createBitmap(brushBitMap, 0, 0, brushBitMap.getWidth(), brushBitMap.getHeight(),
+                                matrix, true);
+                        widthBrushImage = rotatedBitmap.getWidth();
+                        lengthBrushImage = rotatedBitmap.getHeight();
 
-                            // for non-rotated
-                            brushXStart = theBrushes[i][j].x - (int) ((float) widthBrushImage / 2.0);
-                            brushXEnd = theBrushes[i][j].x + (int) ((float) widthBrushImage / 2.0);
-                            brushYStart = theBrushes[i][j].y - (int) ((float) lengthBrushImage / 2.0);
-                            brushYEnd = theBrushes[i][j].y + (int) ((float) lengthBrushImage / 2.0);
-//                            brushXStart = theBrushes[i][j].x - (int)((float)widthBrushImage);
-//                            brushXEnd   = theBrushes[i][j].x + (int)((float)widthBrushImage);
-//                            brushYStart = theBrushes[i][j].y - (int)((float)lengthBrushImage);
-//                            brushYEnd   = theBrushes[i][j].y + (int)((float)lengthBrushImage);
-                            brushRed = (theBrushes[i][j].color & 0x00FF0000) >>> 16;
-                            brushGrn = (theBrushes[i][j].color & 0x0000FF00) >>> 8;
-                            brushBlu = (theBrushes[i][j].color & 0x000000FF);
+                        brushXStart = theBrushes[n].x - (int) ((float) widthBrushImage / 2.0);
+                        brushXEnd = theBrushes[n].x + (int) ((float) widthBrushImage / 2.0);
+                        brushYStart = theBrushes[n].y - (int) ((float) lengthBrushImage / 2.0);
+                        brushYEnd = theBrushes[n].y + (int) ((float) lengthBrushImage / 2.0);
 
-                            // Render the brushes
-                            int x, y;
+                        brushRed = (theBrushes[n].color & 0x00FF0000) >>> 16;
+                        brushGrn = (theBrushes[n].color & 0x0000FF00) >>> 8;
+                        brushBlu = (theBrushes[n].color & 0x000000FF);
 
-                            int brushSampleX, brushSampleY;
-                            int sourcePixel, outColor;
-                            brushSizeMult = ((float) 1 / theBrushes[i][j].size);
+                        // Render the brushes
+                        int x, y;
 
-                            for (xSource = brushXStart, x = 0; xSource <= brushXEnd; xSource++, x++) {
-                                for (ySource = brushYStart, y = 0; ySource <= brushYEnd; ySource++, y++) {
-                                    if (xSource < widthSourceImage) {
-                                        if (ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
+                        int brushSampleX, brushSampleY;
+                        int sourcePixel, outColor;
+                        brushSizeMult = ((float) 1 / theBrushes[n].size);
 
-                                            sourcePixel = imageBitmap.getPixel(xSource, ySource);
+                        for (xSource = brushXStart, x = 0; xSource <= brushXEnd; xSource++, x++) {
+                            for (ySource = brushYStart, y = 0; ySource <= brushYEnd; ySource++, y++) {
+                                if (xSource < widthSourceImage) {
+                                    if (ySource < lengthSourceImage && xSource >= 0 && ySource >= 0) {
 
-                                            brushSampleX = (int) ((float) x * ((brushSizeMult) / 2.0));
-                                            brushSampleY = (int) ((float) y * ((brushSizeMult) / 2.0));
-                                            brushSample = 255;
-                                            if (brushSampleX < widthBrushImage && brushSampleX >= 0) {
-                                                if (brushSampleY < lengthBrushImage && brushSampleY >= 0) {
+                                        sourcePixel = imageBitmap.getPixel(xSource, ySource);
 
-                                                    brushSample = 255 - rotatedBitmap.getPixel(brushSampleX, brushSampleY) & 0x000000FF;
+                                        brushSampleX = (int) ((float) x * ((brushSizeMult) / 2.0));
+                                        brushSampleY = (int) ((float) y * ((brushSizeMult) / 2.0));
+                                        brushSample = 0;
+                                        if (brushSampleX < widthBrushImage && brushSampleX >= 0) {
+                                            if (brushSampleY < lengthBrushImage && brushSampleY >= 0) {
 
-                                                    //outputRed = (brushRed * (255-brushSample)) >>> 8;
-                                                    //outputGrn = (brushGrn * (255-brushSample)) >>> 8;
-                                                    //outputBlu = (brushBlu * (255-brushSample)) >>> 8;
+                                                brushSample = 255 - rotatedBitmap.getPixel(brushSampleX, brushSampleY) & 0x000000FF;
 
-                                                    if (brushSample < 254) {
-                                                        outputRed = ((((sourcePixel & 0x00FF0000) >>> 16) * (brushSample)) +
-                                                                (brushRed * (255 - brushSample))) >>> 8;
-                                                        outputGrn = ((((sourcePixel & 0x0000FF00) >>> 8) * (brushSample)) +
-                                                                (brushGrn * (255 - brushSample))) >>> 8;
-                                                        outputBlu = ((((sourcePixel & 0x000000FF)) * (brushSample)) +
-                                                                (brushBlu * (255 - brushSample))) >>> 8;
+                                                //outputRed = (brushRed * (255-brushSample)) >>> 8;
+                                                //outputGrn = (brushGrn * (255-brushSample)) >>> 8;
+                                                //outputBlu = (brushBlu * (255-brushSample)) >>> 8;
 
+                                                if (brushSample > 0) {
+                                                    outputRed = ((((sourcePixel & 0x00FF0000) >>> 16) * (brushSample)) +
+                                                            (brushRed * (255-brushSample))) >>> 8;
+                                                    outputGrn = ((((sourcePixel & 0x0000FF00) >>> 8) * (brushSample)) +
+                                                            (brushGrn * (255-brushSample))) >>> 8;
+                                                    outputBlu = ((((sourcePixel & 0x000000FF)) * (brushSample)) +
+                                                            (brushBlu * (255-brushSample))) >>> 8;
 
-                                                        //outputRed = 255 - brushSample; // testing
-                                                        outColor = 0xFF000000 | (outputRed << 16) | (outputGrn << 8) | outputBlu;
+                                                    //outputRed = 255 - brushSample; // testing
+                                                    outColor = 0xFF000000 | (outputRed << 16) | (outputGrn << 8) | outputBlu;
 
-                                                        imageBitmap.setPixel(xSource, ySource, outColor);
-                                                    }
+                                                    imageBitmap.setPixel(xSource, ySource, outColor);
                                                 }
                                             }
                                         }
@@ -226,12 +273,15 @@ String cool= "cool";
                                 }
                             }
                         }
-                    }
+                    }  // n
+
+                    createTempImageFile();
 
                     // Set it to the UI
                     ImageView imageView = (ImageView) findViewById(R.id.imageView);
                     imageView.setImageBitmap(imageBitmap);
-                    createTempImageFile();
+
+
                 } catch (Exception e) {
                     Log.e("imageBitmap:", "problem here");
                     Log.e("imageBitmap: xSource", Integer.toString(xSource));

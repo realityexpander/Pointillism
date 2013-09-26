@@ -4,11 +4,15 @@
 <RelativeLayout
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
-xmlns:android="http://schemas.android.com/apk/res/android">
+xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
 <FrameLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/master_frame">
+    android:id="@+id/master_frame"
+    android:background="@drawable/gradient">
+
 </FrameLayout>
 
 <GridView
@@ -20,7 +24,8 @@ xmlns:android="http://schemas.android.com/apk/res/android">
     android:numColumns="5"
     android:stackFromBottom="false"
     android:layout_gravity="bottom" />
-<HorizontalScrollView
+
+    <HorizontalScrollView
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:id="@+id/horizontalScrollView"
@@ -36,5 +41,6 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:cropToPadding="false" />
 
 </HorizontalScrollView>
+
 
 </RelativeLayout>
