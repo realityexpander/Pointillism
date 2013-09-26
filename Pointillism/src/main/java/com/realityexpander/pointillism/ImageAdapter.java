@@ -47,11 +47,11 @@ public class ImageAdapter extends BaseAdapter{
 
     // references to our images
     private Integer[] mThumbIds = {
-            R.drawable.ic_launcher,
-            R.drawable.gallery_icon,
-            R.drawable.share_icon,
-            R.drawable.ic_launcher,
-            R.drawable.share_icon,
+            R.drawable.p1,
+            R.drawable.p2,
+            R.drawable.p3,
+            R.drawable.p4,
+            R.drawable.p5,
 
 
 
