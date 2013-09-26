@@ -51,7 +51,7 @@ String cool= "cool";
     private HorizontalScrollView container;
     private int currentX;
     private int currentY;
-    private static final int MAX_SPLASH_SECONDS = 3;
+    private static final int MAX_SPLASH_SECONDS = 30;
     private Dialog splashDialog;
 
     private class StateSaver {
@@ -62,7 +62,8 @@ String cool= "cool";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+       //setContentView(R.layout.activity_main);
 
         StateSaver data = (StateSaver) getLastNonConfigurationInstance();
         if (data != null) { // "all this has happened before"
@@ -74,7 +75,7 @@ String cool= "cool";
         } else {
             showSplashScreen();
             setContentView(R.layout.activity_main);
-
+//
 
 
             GridView gridview = (GridView) findViewById(R.id.gridView);
@@ -282,7 +283,7 @@ String cool= "cool";
         if (splashDialog != null) {
             data.showSplashScreen = true;
             removeSplashScreen();
-            PickGalleryImage();
+
         }
         return data;
     }
