@@ -53,7 +53,7 @@ String cool= "cool";
     private HorizontalScrollView container;
     private int currentX;
     private int currentY;
-    private static final int MAX_SPLASH_SECONDS = 3;
+    private static final int MAX_SPLASH_SECONDS = 5;
     private Dialog splashDialog;
 
     private class StateSaver {
@@ -460,7 +460,8 @@ String cool= "cool";
     }
 
     private void showSplashScreen() {
-        splashDialog = new Dialog(this);
+
+        splashDialog = new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         splashDialog.setContentView(R.layout.splashscreen);
         splashDialog.setCancelable(false);
         splashDialog.show();
