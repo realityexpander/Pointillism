@@ -131,7 +131,7 @@ String cool= "cool";
                         switch( position ){
                             //brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
                             case 0:
-                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush1);
+                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush5);
                                 break;
                             case 1:
                                 brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
@@ -140,13 +140,13 @@ String cool= "cool";
                                 brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush3);
                                 break;
                             case 3:
-                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush4);
+                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush8);
                                 break;
                             case 4:
-                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush5);
+                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush9);
                                 break;
                             default:
-                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush2);
+                                brushBitMap = BitmapFactory.decodeResource(getResources(), R.drawable.brush4);
                         }
 
                         // Apply a rotation
@@ -243,12 +243,73 @@ String cool= "cool";
                                     break;
 
                                 case 2:
+                                    // On a Grid
+                                    //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                                    //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                                    // Randomly distributed
+                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                                    // Size = random
+                                    //theBrushes[i].size = (float) Math.random() / 2;
+                                    // Size = hue (value)
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theBrushes[i].size = (float) (theHSVColor[0] / 360.0);
+
+                                    // Change the brush color by a small random amount
+                                    theHSVColor[0] += (Math.random() * 30);
+                                    theBrushes[i].color = Color.HSVToColor(theHSVColor);
+
+                                    //Angle = distance from top
+                                    theBrushes[i].angle = (float) Math.sqrt( Math.pow(theBrushes[i].x - (widthSourceImage/2.0), 2.0)  + Math.pow((theBrushes[i].y - (lengthSourceImage/2.0)), 2.0) );
                                     break;
 
                                 case 3:
+                                    // On a Grid
+                                    theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                                    theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                                    // Randomly distributed
+                                    //theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                    //theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                                    // Size = random
+                                    //theBrushes[i].size = (float) Math.random() / 2;
+                                    // Size = brightness (value)
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theBrushes[i].size = 1 - theHSVColor[0];
+
+                                    // Change the brush color by a small random amount
+                                    theHSVColor[0] += (Math.random() * 30);
+                                    theBrushes[i].color = Color.HSVToColor(theHSVColor);
+
+                                    //Angle = distance from top
+                                    theBrushes[i].angle = (float) Math.sqrt( Math.pow(theBrushes[i].x - (widthSourceImage/2.0), 2.0)  + Math.pow((theBrushes[i].y - (lengthSourceImage/2.0)), 2.0) );
+
                                     break;
 
                                 case 4:
+                                    // On a Grid
+                                    //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
+                                    //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
+                                    // Randomly distributed
+                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) - 1;
+                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) - 1;
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = imageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+                                    // Size = random
+                                    //theBrushes[i].size = (float) Math.random() / 2;
+                                    // Size = brightness (value)
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theBrushes[i].size = 1 - theHSVColor[0];
+
+                                    // Change the brush value by a small random amount
+                                    theHSVColor[2] += Math.min(Math.random() * 30, 1);
+                                    theBrushes[i].color = Color.HSVToColor(theHSVColor);
+
+                                    //Angle = color
+                                    theBrushes[i].angle = theHSVColor[0];
                                     break;
 
                                 default:
