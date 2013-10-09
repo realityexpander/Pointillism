@@ -2,16 +2,18 @@
 
 
 <RelativeLayout
-android:layout_width="fill_parent"
-android:layout_height="fill_parent"
-xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+xmlns:android="http://schemas.android.com/apk/res/android">
 
 <FrameLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:id="@+id/master_frame"
-    android:background="@drawable/gradient">
+    android:background="@drawable/gradient"
+    android:focusableInTouchMode="false"
+    android:focusable="false"
+    android:visibility="invisible">
 
 </FrameLayout>
 
@@ -23,24 +25,43 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:choiceMode="singleChoice"
     android:numColumns="5"
     android:stackFromBottom="false"
-    android:layout_gravity="bottom" />
+    android:layout_gravity="bottom"
+    android:fastScrollAlwaysVisible="false"
+    android:fastScrollEnabled="false" />
 
     <HorizontalScrollView
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:id="@+id/horizontalScrollView"
-    android:layout_gravity="center_horizontal|top"
-    android:layout_above="@+id/gridView" >
+    android:layout_above="@+id/gridView"
+        android:fillViewport="true"
+        android:measureAllChildren="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="true">
 
-    <ImageView
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/pointillism_splash"
+                android:cropToPadding="false"
+                android:background="@drawable/gradient"
+                android:baselineAlignBottom="false"
+                android:id="@+id/imageView" />
+
+    </HorizontalScrollView>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:adjustViewBounds="false"
-        android:src="@drawable/ic_launcher"
-        android:cropToPadding="false" />
-
-</HorizontalScrollView>
+        android:id="@+id/progressBar"
+        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:visibility="invisible" />
 
 
 </RelativeLayout>
