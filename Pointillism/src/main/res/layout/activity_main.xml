@@ -23,11 +23,12 @@ xmlns:android="http://schemas.android.com/apk/res/android">
     android:layout_alignBottom="@+id/master_frame"
     android:id="@+id/gridView"
     android:choiceMode="singleChoice"
-    android:numColumns="5"
+    android:numColumns="6"
     android:stackFromBottom="false"
     android:layout_gravity="bottom"
     android:fastScrollAlwaysVisible="false"
-    android:fastScrollEnabled="false" />
+    android:fastScrollEnabled="false"
+    android:layout_alignParentStart="false" />
 
     <HorizontalScrollView
     android:layout_width="fill_parent"

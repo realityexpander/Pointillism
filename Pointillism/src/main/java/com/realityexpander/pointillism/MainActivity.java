@@ -45,9 +45,6 @@ public class MainActivity extends Activity {
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
 
-
-String cool= "cool";
-
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
 
     public Bitmap imageBitmap;
@@ -81,7 +78,7 @@ String cool= "cool";
     int lengthSourceImage ;
 
     Bitmap brushBitMap, rotatedBitmap;
-    Bitmap brushBitMap1, brushBitMap2, brushBitMap3, brushBitMap4, brushBitMap5;
+    Bitmap brushBitMap1, brushBitMap2, brushBitMap3, brushBitMap4, brushBitMap5, brushBitMap6;
     int sourceSample[][];
     int brushSample;
     int brushRed, brushGrn, brushBlu;
@@ -133,9 +130,11 @@ String cool= "cool";
         brushBitMap3 = BitmapFactory.decodeResource(getResources(), R.drawable.brush3);
         brushBitMap4 = BitmapFactory.decodeResource(getResources(), R.drawable.brush8);
         brushBitMap5 = BitmapFactory.decodeResource(getResources(), R.drawable.brush9);
+        brushBitMap6 = BitmapFactory.decodeResource(getResources(), R.drawable.brush11);
 
         runningBGTask = false;
 
+        // Get the size of the screen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -174,6 +173,9 @@ String cool= "cool";
                                 break;
                             case 4:
                                 brushBitMap = brushBitMap5;
+                                break;
+                            case 5:
+                                brushBitMap = brushBitMap6;
                                 break;
                             default:
                                 brushBitMap = brushBitMap2;
@@ -222,7 +224,7 @@ String cool= "cool";
         });
 
 
-
+        // attempt to scroll to middle
 //        final HorizontalScrollView scrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
 //        ViewTreeObserver vto = scrollView.getViewTreeObserver();
 //        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -275,6 +277,8 @@ String cool= "cool";
                     for (int x = 0; x <= widthNumBrushes; x++) {
                         for (int y = 0; y <= lengthNumBrushes; y++) {
                             // Set the location of the brush
+
+
                             theBrushes[i] = new brush();
 
                             switch(mEffectAlgorithm) {
@@ -348,15 +352,19 @@ String cool= "cool";
                                     theBrushes[i].x = (int) (Math.random() * widthSourceImage);
                                     theBrushes[i].y = (int) (Math.random() * lengthSourceImage);
                                     theBrushes[i].color = sourceImageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
-
-                                    //theBrushes[i].size = (float)  Math.random() / 2;
-                                    // Size = brightness (value)
                                     Color.colorToHSV(theBrushes[i].color, theHSVColor);
-                                    theBrushes[i].size = (float) Math.max(theHSVColor[2]*2, .01);
 
-                                    // Change the brush color by a small amount based on Value
-                                    theHSVColor[0] += theHSVColor[2] * 3.0;
+                                    theBrushes[i].size = (float)  Math.random() * 2;
+                                    //Log.e("theBrushes[" + Integer.toString(i) + "].size", Float.toString(theBrushes[i].size));
+
+                                    // Size = brightness (value)
+                                    //theBrushes[i].size = (float) Math.max(theHSVColor[2]*2, .01);
+
+                                    // Change the brush color by a small amount based on saturation
+                                    theHSVColor[0] += theHSVColor[1] * 100.0 + (Math.random()*20.0);
                                     theBrushes[i].color = Color.HSVToColor(theHSVColor);
+                                    //Log.e("theBrushes[" + Integer.toString(i) + "].color", Integer.toHexString(theBrushes[i].color));
+
 
                                     // Change the brush color by a small random amount
                                     //theHSVColor[0] += (Math.random() * 50);
@@ -370,6 +378,7 @@ String cool= "cool";
                                     break;
 
                                 case 4:
+                                    if (i>15) continue;
                                     // On a Grid
                                     //theBrushes[i].x = (x*widthBrushImage)  + (widthBrushImage /2);
                                     //theBrushes[i].y = (y*lengthBrushImage) + (lengthBrushImage/2);
@@ -378,19 +387,40 @@ String cool= "cool";
                                     theBrushes[i].y = (int) (Math.random() * lengthSourceImage) ;
                                     // Sample the source image to get color of the brush
                                     theBrushes[i].color = sourceImageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+
                                     // Size = random
                                     //theBrushes[i].size = (float) Math.random() / 2;
                                     // Size = brightness (value)
                                     Color.colorToHSV(theBrushes[i].color, theHSVColor);
-                                    theBrushes[i].size =  theHSVColor[2] * (float) 0.7;
+                                    theBrushes[i].size =  1 - theHSVColor[2];
 
-                                    // Change the brush value by a small random amount
-                                    theHSVColor[2] += Math.max(Math.random() * 50, 2);
+                                    // Change the brush color by a small random amount
+                                    theHSVColor[0] += Math.max(Math.random() * 100, 2);
+                                    theHSVColor[2] = Math.abs( theHSVColor[2] - ((float) Math.random() + (float) 0.5) );
                                     theBrushes[i].color = Color.HSVToColor(theHSVColor);
 
-                                    //Angle = color
+                                    //Angle = distance from center
                                     //theBrushes[i].angle = theHSVColor[0];
                                     theBrushes[i].angle = (float) Math.sqrt( Math.pow(theBrushes[i].x - (widthSourceImage/2.0), 2.0)  + Math.pow((theBrushes[i].y - (lengthSourceImage/2.0)), 2.0) ) / (float) 2.0;
+                                    break;
+
+                                case 5:
+                                    if (i>10) continue;
+                                    // Randomly distributed
+                                    theBrushes[i].x = (int) (Math.random() * widthSourceImage) ;
+                                    theBrushes[i].y = (int) (Math.random() * lengthSourceImage) ;
+                                    // Sample the source image to get color of the brush
+                                    theBrushes[i].color = sourceImageBitmap.getPixel(theBrushes[i].x, theBrushes[i].y);
+
+                                    Color.colorToHSV(theBrushes[i].color, theHSVColor);
+                                    theHSVColor[2] = Math.abs( theHSVColor[2] - ((float) Math.random() + (float) 0.5) );
+                                    theBrushes[i].color = Color.HSVToColor(theHSVColor);
+
+                                    theBrushes[i].size = (float) Math.random() * (float) 1.5;
+                                    // Size = constant
+                                    //theBrushes[i].size = (float) .8;
+                                    // Angle = color
+                                    theBrushes[i].angle = theHSVColor[2] * 180;
                                     break;
 
                                 default:
@@ -465,42 +495,48 @@ String cool= "cool";
 
                                                 switch(mEffectAlgorithm){
 
+//                                                    case 5:
+////                                                    case 3:
+//                                                        if (brushSample < 2 || brushSample == 255)
+//                                                            continue;
+//                                                        outputRed = ((brushRed * (brushSample)) >>> 8) +
+//                                                                ( (((sourcePixel & 0x00FF0000) >>> 16) ));
+//                                                        outputGrn = ((brushGrn * (brushSample)) >>> 8) +
+//                                                                ( (((sourcePixel & 0x0000FF00) >>> 8) ));
+//                                                        outputBlu = ((brushBlu * (brushSample)) >>> 8) +
+//                                                                ( (((sourcePixel & 0x000000FF)) ));
+//
+//                                                        outputRed = Math.min(outputRed, 255);
+//                                                        outputGrn = Math.min(outputGrn, 255);
+//                                                        outputBlu = Math.min(outputBlu, 255);
+//                                                        break;
+
+                                                    case 5:
                                                     case 3:
-                                                        if (brushSample > 250)
+                                                        if (brushSample < 2 || brushSample == 255)
                                                             continue;
-                                                        outputRed = Math.min( (((sourcePixel & 0x00FF0000) >>> 16) ),
+                                                        outputRed = Math.max( (((sourcePixel & 0x00FF0000) >>> 16) ),
                                                                 (brushRed * (brushSample)) >>> 8);
-                                                        outputGrn = Math.min( (((sourcePixel & 0x0000FF00) >>> 8) ),
+                                                        outputGrn = Math.max( (((sourcePixel & 0x0000FF00) >>> 8) ),
                                                                 (brushGrn * (brushSample)) >>> 8);
-                                                        outputBlu = Math.min( (((sourcePixel & 0x000000FF)) ),
+                                                        outputBlu = Math.max( (((sourcePixel & 0x000000FF)) ),
                                                                 (brushBlu * (brushSample)) >>> 8);
                                                         break;
 
-//                                                    case 3:
-//                                                        if (brushSample > 250)
+//                                                    case 5: // square blockiness
+//                                                        outputRed = ((sourcePixel & 0x00FF0000) >>> 16);
+//                                                        outputGrn = ((sourcePixel & 0x0000FF00) >>> 8);
+//                                                        outputBlu = ((sourcePixel & 0x000000FF));
+//                                                        if (brushSample > 255)
 //                                                            continue;
-//                                                        outputRed = Math.max( (((sourcePixel & 0x00FF0000) >>> 16) ),
-//                                                                (brushRed * (brushSample)) >>> 8);
-//                                                        outputGrn = Math.max( (((sourcePixel & 0x0000FF00) >>> 8) ),
-//                                                                (brushGrn * (brushSample)) >>> 8);
-//                                                        outputBlu = Math.max( (((sourcePixel & 0x000000FF)) ),
-//                                                                (brushBlu * (brushSample)) >>> 8);
+//
+//                                                        outputRed = (outputRed * (255 - brushSample)) +
+//                                                                (brushRed * (brushSample)) >>> 8;
+//                                                        outputGrn = (outputGrn * (255 - brushSample)) +
+//                                                                (brushGrn * (brushSample)) >>> 8;
+//                                                        outputBlu = (outputBlu * (255 - brushSample)) +
+//                                                                (brushBlu * (brushSample)) >>> 8;
 //                                                        break;
-
-                                                    case 5: // square blockiness
-                                                        outputRed = ((sourcePixel & 0x00FF0000) >>> 16);
-                                                        outputGrn = ((sourcePixel & 0x0000FF00) >>> 8);
-                                                        outputBlu = ((sourcePixel & 0x000000FF));
-                                                        if (brushSample > 255)
-                                                            continue;
-
-                                                        outputRed = (outputRed * (255 - brushSample)) +
-                                                                (brushRed * (brushSample)) >>> 8;
-                                                        outputGrn = (outputGrn * (255 - brushSample)) +
-                                                                (brushGrn * (brushSample)) >>> 8;
-                                                        outputBlu = (outputBlu * (255 - brushSample)) +
-                                                                (brushBlu * (brushSample)) >>> 8;
-                                                        break;
 
                                                     default:
                                                         outputRed = ((sourcePixel & 0x00FF0000) >>> 16);
@@ -536,27 +572,27 @@ String cool= "cool";
                     }  // n
 
                 } catch (Exception e) {
-//                    Log.e("imageBitmap:", "problem here");
-//                    Log.e("imageBitmap: xSource", Integer.toString(xSource));
-//                    Log.e("imageBitmap: ySource", Integer.toString(ySource));
-//                    Log.e("imageBitmap: brushXStart", Integer.toString(brushXStart));
-//                    Log.e("imageBitmap: brushXEnd", Integer.toString(brushXEnd));
-//                    Log.e("imageBitmap: brushYStart", Integer.toString(brushYStart));
-//                    Log.e("imageBitmap: brushYEnd", Integer.toString(brushYEnd));
-//                    Log.e("imageBitmap: brushSampleX", Integer.toString(brushSampleX));
-//                    Log.e("imageBitmap: brushSampleY", Integer.toString(brushSampleY));
-//                    Log.e("imageBitmap: widthSourceImage", Integer.toString(widthSourceImage));
-//                    Log.e("imageBitmap: lengthSourceImage", Integer.toString(lengthSourceImage));
-//                    Log.e("imageBitmap: widthBrushImage", Integer.toString(widthBrushImage));
-//                    Log.e("imageBitmap: lengthBrushImage", Integer.toString(lengthBrushImage));
-//                    Log.e("imageBitmap: brushSizeMult", Float.toString(brushSizeMult));
-//                    Log.e("imageBitmap: debug_got_pixel", Integer.toString(debug_got_pixel));
-//                    Log.e("imageBitmap: x", Integer.toString(x));
-//                    Log.e("imageBitmap: y", Integer.toString(y));
-//                    Log.e("imagebitmap: brushBitMap", Boolean.toString((boolean) (brushBitMap == null)));
-//                    Log.e("imagebitmap: n", Integer.toString(n));
-//                    Log.e("imagebitmap: theBrush[n].size", Float.toString(theBrushes[n].size));
-//                    //Log.e("0xcafebabe", Log.getStackTraceString(e.getCause().getCause()));
+                    Log.e("imageBitmap:", "problem here");
+                    Log.e("imageBitmap: xSource", Integer.toString(xSource));
+                    Log.e("imageBitmap: ySource", Integer.toString(ySource));
+                    Log.e("imageBitmap: brushXStart", Integer.toString(brushXStart));
+                    Log.e("imageBitmap: brushXEnd", Integer.toString(brushXEnd));
+                    Log.e("imageBitmap: brushYStart", Integer.toString(brushYStart));
+                    Log.e("imageBitmap: brushYEnd", Integer.toString(brushYEnd));
+                    Log.e("imageBitmap: brushSampleX", Integer.toString(brushSampleX));
+                    Log.e("imageBitmap: brushSampleY", Integer.toString(brushSampleY));
+                    Log.e("imageBitmap: widthSourceImage", Integer.toString(widthSourceImage));
+                    Log.e("imageBitmap: lengthSourceImage", Integer.toString(lengthSourceImage));
+                    Log.e("imageBitmap: widthBrushImage", Integer.toString(widthBrushImage));
+                    Log.e("imageBitmap: lengthBrushImage", Integer.toString(lengthBrushImage));
+                    Log.e("imageBitmap: brushSizeMult", Float.toString(brushSizeMult));
+                    Log.e("imageBitmap: debug_got_pixel", Integer.toString(debug_got_pixel));
+                    Log.e("imageBitmap: x", Integer.toString(x));
+                    Log.e("imageBitmap: y", Integer.toString(y));
+                    Log.e("imagebitmap: brushBitMap", Boolean.toString((boolean) (brushBitMap == null)));
+                    Log.e("imagebitmap: n", Integer.toString(n));
+                    Log.e("imagebitmap: theBrush[n].size", Float.toString(theBrushes[n].size));
+                    //Log.e("0xcafebabe", Log.getStackTraceString(e.getCause().getCause()));
                     Log.e("0xcafebabe ", "Rendering Pixels", e);
                 }
 
@@ -849,4 +885,20 @@ String cool= "cool";
         return null; // failure
     }
 
+    // Save the image as a file here
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState){
+//        super.onSaveInstanceState(savedInstanceState);
+//        savedInstanceState.putString("message", text.getText().toString());
+//    }
+//
+    // reload the image from the file here
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState){
+//        super.onRestoreInstanceState(savedInstanceState);
+//        message = savedInstanceState.getString("message");
+//    }
+
 }
+
+
